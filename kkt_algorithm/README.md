@@ -3,9 +3,16 @@
 1. pip install -r requirements.txt
 2. python benchmark.py
 
-KKT vs Prim vs Kruskal MST Benchmark
-============================================================
+Datasets used:
+1) http://snap.stanford.edu/data/roadNet-US.txt.gz
+2) http://snap.stanford.edu/data/roadNet-PA.txt.gz
+3) http://snap.stanford.edu/data/soc-LiveJournal1.txt.gz
 
+KKT vs Prim vs Kruskal MST Benchmark
+================================================================================
+
+============================================================
+🔹 SMALL SYNTHETIC: n=1,000, m=5,000
 ============================================================
 Graph: n=1,000, m=5,000
 
@@ -17,16 +24,18 @@ Graph: n=1,000, m=5,000
 | Kruskal   | 13209.7 |    999 | True         | True              |
 | KKT       | 13209.7 |    999 | True         | True              |
 
-🎯 RESULT: ALL WEIGHTS MATCH & VALID MSF ✅
+ RESULT: ALL WEIGHTS MATCH & VALID MSF 
   Run 1/3... OK
   Run 2/3... OK
   Run 3/3... OK
 | Algorithm | Avg Time (s) |
 |-----------|--------------|
-| Prim      |     0.0088 |
-| Kruskal   |     0.0053 |
-| KKT       |     0.0833 |
+| Prim      |     0.0076 |
+| Kruskal   |     0.0045 |
+| KKT       |     0.0675 |
 
+============================================================
+🔹 SMALL SYNTHETIC: n=5,000, m=25,000
 ============================================================
 Graph: n=5,000, m=25,000
 
@@ -38,22 +47,43 @@ Graph: n=5,000, m=25,000
 | Kruskal   | 62817.5 |   4999 | True         | True              |
 | KKT       | 62817.5 |   4999 | True         | True              |
 
-🎯 RESULT: ALL WEIGHTS MATCH & VALID MSF ✅
+ RESULT: ALL WEIGHTS MATCH & VALID MSF 
   Run 1/3... OK
   Run 2/3... OK
   Run 3/3... OK
 | Algorithm | Avg Time (s) |
 |-----------|--------------|
-| Prim      |     0.0667 |
-| Kruskal   |     0.0313 |
-| KKT       |     3.9908 |
+| Prim      |     0.0489 |
+| Kruskal   |     0.0231 |
+| KKT       |     3.1486 |
 
-============================================================
-LARGE DATASET: CA Road Network
-============================================================
-Graph: n=1,971,281, m=5,533,214
+================================================================================
+ MASSIVE: PA Roads (1.1M nodes)
+================================================================================
+Graph: n=1,090,920, m=3,083,796
 
 🔍 MST CORRECTNESS VERIFICATION
+============================================================
+| Algorithm | Weight  | #Edges | Weight Match | Valid MST Forest? |
+|-----------|---------|--------|--------------|-------------------|
+| Prim      | 1087886.0 | 1087886 | True         | True              |
+| Kruskal   | 1087886.0 | 1087886 | True         | True              |
+| KKT       | 1087886.0 | 1087886 | True         | True              |
+
+ RESULT: ALL WEIGHTS MATCH & VALID MSF 
+  Run 1/1... OK
+| Algorithm | Avg Time (s) |
+|-----------|--------------|
+| Prim      |     5.5492 |
+| Kruskal   |     3.0974 |
+| KKT       |    14.2092 |
+
+================================================================================
+ MASSIVE: CA Roads (2.1M nodes)
+================================================================================
+Graph: n=1,971,281, m=5,533,214
+
+ MST CORRECTNESS VERIFICATION
 ============================================================
 | Algorithm | Weight  | #Edges | Weight Match | Valid MST Forest? |
 |-----------|---------|--------|--------------|-------------------|
@@ -61,13 +91,35 @@ Graph: n=1,971,281, m=5,533,214
 | Kruskal   | 1962568.0 | 1962568 | True         | True              |
 | KKT       | 1962568.0 | 1962568 | True         | True              |
 
-🎯 RESULT: ALL WEIGHTS MATCH & VALID MSF ✅
+ RESULT: ALL WEIGHTS MATCH & VALID MSF 
   Run 1/1... OK
 | Algorithm | Avg Time (s) |
 |-----------|--------------|
-| Prim      |    10.9571 |
-| Kruskal   |     5.4105 |
-| KKT       |    44.6502 |
+| Prim      |    10.7652 |
+| Kruskal   |     4.9988 |
+| KKT       |    41.5156 |
+
+================================================================================
+ MASSIVE: LiveJournal Social (4.8M nodes, 69M edges) 🔥
+================================================================================
+   Sampled to 20M edges (memory)
+Graph: n=4,847,571, m=68,993,773
+
+🔍 MST CORRECTNESS VERIFICATION
+============================================================
+| Algorithm | Weight  | #Edges | Weight Match | Valid MST Forest? |
+|-----------|---------|--------|--------------|-------------------|
+| Prim      | 2540669.0 | 2540669 | True         | True              |
+| Kruskal   | 2540669.0 | 2540669 | True         | True              |
+| KKT       | 2540669.0 | 2540669 | True         | True              |
+
+ RESULT: ALL WEIGHTS MATCH & VALID MSF 
+  Run 1/1... OK
+| Algorithm | Avg Time (s) |
+|-----------|--------------|
+| Prim      |   134.2179 |
+| Kruskal   |    19.1262 |
+| KKT       |    37.2705 |
 
 As we can clearly see, the theoretical O(m) linear time complexity of KKT doesn't imply practical speedup. 
 This is because of huge constants: 
