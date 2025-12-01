@@ -1,0 +1,10 @@
+FREIVALD'S ALGORITHM - EXPERIMENTAL RESULTS SUMMARY
+
+
+DATASETS GENERATED:
+  1. performance_data.csv - Time complexity comparison
+  2. error_detection_data.csv - Error detection rates
+  3. k_iterations_data.csv - Reliability vs. iterations
+
+VISUALIZATIONS:
+  - performance_graph.png
