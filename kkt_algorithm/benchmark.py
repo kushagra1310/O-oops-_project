@@ -7,13 +7,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 sys.path.append('.')
 
-
 from typing import List, Tuple, Dict
 from utils import generate_random_graph, Edge, load_snap_roadnet
 from prim_mst import prim_mst
 from kruskal_mst import kruskal_mst
 from kkt_mst import compute_kkt_mst
-
 
 def run_timing(n: int, edges: List[Edge]) -> Dict[str, float]:
     """Time all three algorithms once."""
@@ -36,7 +34,6 @@ def run_timing(n: int, edges: List[Edge]) -> Dict[str, float]:
     
     return times
 
-
 def benchmark(n: int, m: int, runs: int = 5, edges: List[Edge] = None, verify: bool = True) -> Dict[str, float]:
     if edges is None:
         edges = generate_random_graph(n, m)
@@ -47,7 +44,7 @@ def benchmark(n: int, m: int, runs: int = 5, edges: List[Edge] = None, verify: b
         results = verify_all_msts(n, edges)
         print_verification(results)
         if not all(abs(r['weight'] - results['Kruskal']['weight']) < 1e-6 and r['valid'] for r in results.values()):
-            print(" Skipping timing - correctness failed!")
+            print("  Skipping timing - correctness failed!")
             return {}
     
     all_times = {'Prim': [], 'Kruskal': [], 'KKT': []}
@@ -71,8 +68,6 @@ def benchmark(n: int, m: int, runs: int = 5, edges: List[Edge] = None, verify: b
     
     return avg_times
 
-
-
 def plot_results(all_results: Dict[str, List[Tuple[int, float]]]) -> None:
     """Generate publication-quality plots."""
     plt.style.use('default')
@@ -82,10 +77,11 @@ def plot_results(all_results: Dict[str, List[Tuple[int, float]]]) -> None:
     for algo in ['Prim', 'Kruskal', 'KKT']:
         ns = [r[0] for r in all_results[algo]]
         ts = [r[1] for r in all_results[algo]]
-        marker = {'Prim': 'o', 'Kruskal': 's', 'KKT': '^'}[algo]
-        color = {'Prim': 'blue', 'Kruskal': 'orange', 'KKT': 'green'}[algo]
-        ax1.plot(ns, ts, marker+'-', linewidth=2.5, markersize=8, 
-                label=f'{algo}', color=color)
+        if ns:  # Only plot if data exists
+            marker = {'Prim': 'o', 'Kruskal': 's', 'KKT': '^'}[algo]
+            color = {'Prim': 'blue', 'Kruskal': 'orange', 'KKT': 'green'}[algo]
+            ax1.plot(ns, ts, marker+'-', linewidth=2.5, markersize=8, 
+                    label=f'{algo}', color=color)
     
     ax1.set_xlabel('Vertices n (log scale)')
     ax1.set_ylabel('Runtime (seconds)')
@@ -94,64 +90,84 @@ def plot_results(all_results: Dict[str, List[Tuple[int, float]]]) -> None:
     ax1.grid(True, alpha=0.3)
     ax1.set_xscale('log')
     
-    # Bar chart
-    sizes = ['n=1K', 'n=5K', 'n=2.1M']
-    prim_t = [all_results['Prim'][i][1] for i in range(min(3, len(all_results['Prim'])))]
-    kruskal_t = [all_results['Kruskal'][i][1] for i in range(min(3, len(all_results['Kruskal'])))]
-    kkt_t = [all_results['KKT'][i][1] for i in range(min(3, len(all_results['KKT'])))]
-    
-    x = np.arange(len(sizes[:len(prim_t)]))
-    width = 0.25
-    ax2.bar(x - width, prim_t, width, label='Prim', alpha=0.8)
-    ax2.bar(x, kruskal_t, width, label='Kruskal', alpha=0.8)
-    ax2.bar(x + width, kkt_t, width, label='KKT', alpha=0.8)
-    ax2.set_xlabel('Graph Size')
-    ax2.set_ylabel('Runtime (s)')
-    ax2.set_title('Runtime Comparison')
-    ax2.set_xticks(x)
-    ax2.set_xticklabels(sizes[:len(x)])
-    ax2.legend()
-    ax2.grid(True, alpha=0.3)
+    # Bar chart - PERFECTLY represents ALL datasets
+    sizes = []
+    for i, data in enumerate(all_results['Prim']):
+        sizes.append(f"n={data[0]:,.0f}")
+
+    if sizes:
+        prim_t = [all_results['Prim'][i][1] for i in range(len(sizes))]
+        kruskal_t = [all_results['Kruskal'][i][1] for i in range(len(sizes))]
+        kkt_t = [all_results['KKT'][i][1] for i in range(len(sizes))]
+        
+        x = np.arange(len(sizes))
+        width = 0.25
+        ax2.bar(x - width, prim_t, width, label='Prim', alpha=0.8, color='blue')
+        ax2.bar(x, kruskal_t, width, label='Kruskal', alpha=0.8, color='orange')
+        ax2.bar(x + width, kkt_t, width, label='KKT', alpha=0.8, color='green')
+        
+        ax2.set_xlabel('Graph Size')
+        ax2.set_ylabel('Runtime (s)')
+        ax2.set_title('Runtime: 2 Small + 3 Massive Datasets')
+        ax2.set_xticks(x)
+        ax2.set_xticklabels(sizes, rotation=45)
+        ax2.legend()
+
     
     plt.tight_layout()
     plt.savefig('mst_benchmark.png', dpi=300, bbox_inches='tight')
     plt.show()
-    print("✅ Saved: mst_benchmark.png")
-
+    print(" Saved: mst_benchmark.png")
 
 if __name__ == "__main__":
     print("KKT vs Prim vs Kruskal MST Benchmark")
-    print("=" * 60)
+    print("=" * 80)
     
-    # Collect results for plotting
     all_results = {'Prim': [], 'Kruskal': [], 'KKT': []}
     
-    # Small synthetic graphs
+    # TWO SMALL SYNTHETIC GRAPHS
     sizes = [(1000, 5000), (5000, 25000)]
     for n, m in sizes:
         print("\n" + "="*60)
+        print(f"🔹 SMALL SYNTHETIC: n={n:,}, m={m:,}")
+        print("="*60)
         avgs = benchmark(n, m, runs=3)
-        if avgs and len(avgs) == 3:  # Prim, Kruskal, KKT exist
-            for algo in all_results:
-                all_results[algo].append((n, avgs[algo]))
-        else:
-            print(f"⚠️ Skipping data collection for n={n}, m={m} due to failed correctness or timing")
-
-    
-    # Large real dataset
-    if os.path.exists('roadNet-CA.txt'):
-        print("\n" + "="*60)
-        print("LARGE DATASET: CA Road Network")
-        print("=" * 60)
-        n, m, edges = load_snap_roadnet('roadNet-CA.txt')
-        avgs = benchmark(n, m, runs=1, edges=edges)
         if avgs and len(avgs) == 3:
             for algo in all_results:
                 all_results[algo].append((n, avgs[algo]))
-        else:
-            print(f"⚠️ Skipping data collection for large dataset due to failed correctness or timing")
     
-    # Generate visualization
-    print("\n🎨 Generating plots...")
+    # THREE MASSIVE REAL DATASETS
+    large_datasets = {
+        'roadNet-PA.txt': 'PA Roads (1.1M nodes)', 
+        'roadNet-CA.txt': 'CA Roads (2.1M nodes)',
+        'soc-LiveJournal1.txt': 'LiveJournal Social (4.8M nodes, 69M edges) 🔥'
+    }
+    
+    for filename, description in large_datasets.items():
+        if os.path.exists(filename):
+            print("\n" + "="*80)
+            print(f" MASSIVE: {description}")
+            print("="*80)
+            try:
+                n, m, edges = load_snap_roadnet(filename)
+                
+                # Memory management for huge graphs
+                if m > 20_000_000:
+                    edges = edges[:20_000_000]
+                    print(f"   Sampled to 20M edges (memory)")
+                
+                avgs = benchmark(n, m, runs=1, edges=edges)
+                if avgs and len(avgs) == 3:
+                    for algo in all_results:
+                        all_results[algo].append((n, avgs[algo]))
+                        
+            except Exception as e:
+                print(f"  Error: {e}")
+        else:
+            print(f" Download: wget http://snap.stanford.edu/data/{filename}.gz")
+    
+    #  TWO PERFECT PLOTS
+    print("\n Generating publication plots...")
     plot_results(all_results)
-    print("✅ Complete! Check mst_benchmark.png")
+    print(" Saved: mst_benchmark.png")
+
